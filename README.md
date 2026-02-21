@@ -10,15 +10,15 @@ Aplicación financiera simulada de tres capas (**Frontend · Backend · Base de 
 ┌──────────────┐      ┌──────────────────┐      ┌──────────────┐
 │   Frontend   │      │     Backend      │      │   Database   │
 │  React/Vite  │─────▶│   PHP 8.2/Apache │─────▶│  MySQL 8.0   │
-│  Nginx :3000 │      │     :8080        │      │   :3306      │
+│  Nginx :3000 │      │     :8088        │      │   :3306      │
 └──────────────┘      └──────────────────┘      └──────────────┘
-     SPA (port 3000)       API REST (port 8080)      Persistencia
+     SPA (port 3000)       API REST (port 8088)      Persistencia
 ```
 
 | Servicio   | Tecnología         | Puerto Host | Puerto Contenedor | Nombre Contenedor  |
 |------------|--------------------|-----------:|------------------:|--------------------|
 | Frontend   | React + Nginx      | `3000`     | `80`              | `finmock_frontend` |
-| Backend    | PHP 8.2 + Apache   | `8080`     | `80`              | `finmock_backend`  |
+| Backend    | PHP 8.2 + Apache   | `8088`     | `80`              | `finmock_backend`  |
 | Database   | MySQL 8.0          | `33066`    | `3306`            | `finmock_db`       |
 
 > La base de datos se expone en el puerto `33066` del host para facilitar la conexión con clientes externos (ej: MySQL Workbench, DBeaver).
@@ -76,7 +76,7 @@ docker compose ps
 | Recurso            | URL                                      |
 |--------------------|------------------------------------------|
 | **Frontend (SPA)** | [http://localhost:3000](http://localhost:3000) |
-| **Backend (API)**  | [http://localhost:8080](http://localhost:8080) |
+| **Backend (API)**  | [http://localhost:8088](http://localhost:8088) |
 
 ### Detener el Entorno
 
@@ -99,9 +99,9 @@ Todos los servicios están conectados a la red bridge `fin_network`. Dentro de e
 | Origen    | Destino   | Hostname   | Puerto |
 |-----------|-----------|------------|-------:|
 | Backend   | Database  | `db`       | `3306` |
-| Frontend  | Backend   | _vía host_ | `8080` |
+| Frontend  | Backend   | _vía host_ | `8088` |
 
-> **Nota:** El frontend es una SPA que corre en el **navegador del usuario**, por lo que las llamadas a la API van a `http://localhost:8080` (el host), no al nombre de servicio Docker.
+> **Nota:** El frontend es una SPA que corre en el **navegador del usuario**, por lo que las llamadas a la API van a `http://localhost:8088` (el host), no al nombre de servicio Docker.
 
 ### Conexión Backend → Base de Datos
 
@@ -126,7 +126,7 @@ La URL de la API se configura en tiempo de **build** mediante la variable de ent
 
 | Variable        | Valor por Defecto         | Descripción                    |
 |-----------------|---------------------------|--------------------------------|
-| `VITE_API_URL`  | `http://localhost:8080`   | URL de la API desde el navegador |
+| `VITE_API_URL`  | `http://localhost:8088`   | URL de la API desde el navegador |
 
 > ⚠️ **Importante:** Vite embebe las variables de entorno en el bundle de JavaScript durante la compilación. Cambiar `VITE_API_URL` requiere **reconstruir** la imagen del frontend.
 
@@ -146,7 +146,7 @@ La URL de la API se configura en tiempo de **build** mediante la variable de ent
 ### `GET /` — Listar Transacciones
 
 ```bash
-curl http://localhost:8080
+curl http://localhost:8088
 ```
 
 **Respuesta** (`200 OK`):
@@ -166,7 +166,7 @@ curl http://localhost:8080
 ### `POST /` — Crear Transacción
 
 ```bash
-curl -X POST http://localhost:8080 \
+curl -X POST http://localhost:8088 \
   -H "Content-Type: application/json" \
   -d '{"description": "Freelance", "amount": 800.00, "type": "income"}'
 ```
