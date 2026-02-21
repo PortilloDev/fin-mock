@@ -1,9 +1,12 @@
 version: '3.8'
 
 services:
-  db:
+  # ========================
+  # Production Environment
+  # ========================
+  db_prod:
     image: mysql:8.0
-    container_name: finmock_db
+    container_name: finmock_db_prod
     environment:
       MYSQL_ROOT_PASSWORD: rootpassword
       MYSQL_DATABASE: findb
@@ -12,10 +15,10 @@ services:
     ports:
       - "33066:3306"
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data_prod:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
-      - fin_network
+      - fin_network_prod
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
       interval: 10s
@@ -23,39 +26,113 @@ services:
       retries: 5
       start_period: 30s
 
-  backend:
+  backend_prod:
     build:
-      context: ./backend
-    container_name: finmock_backend
+      context: ./backend/prod
+    container_name: finmock_backend_prod
     ports:
       - "8088:80"
     environment:
-      DB_HOST: db
+      DB_HOST: db_prod
       DB_NAME: findb
       DB_USER: user
       DB_PASS: password
     depends_on:
-      db:
+      db_prod:
         condition: service_healthy
     networks:
-      - fin_network
+      - fin_network_prod
 
-  frontend:
+  frontend_prod:
     build:
-      context: ./frontend
+      context: ./frontend/prod
       args:
         VITE_API_URL: http://localhost:8088
-    container_name: finmock_frontend
+    container_name: finmock_frontend_prod
+    deploy:
+      resources:
+        limits:
+          cpus: "0.15"
+          memory: 250M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      - backend_prod
     networks:
-      - fin_network
+      - fin_network_prod
+
+  # ========================
+  # Dev Environment
+  # ========================
+  db_dev:
+    image: mysql:8.0
+    container_name: finmock_db_dev
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: findb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "33068:3306"
+    volumes:
+      - db_data_dev:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - fin_network_dev
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  backend_dev:
+    build:
+      context: ./backend/dev
+    container_name: finmock_backend_dev
+    ports:
+      - "8089:80"
+    environment:
+      DB_HOST: db_dev
+      DB_NAME: findb
+      DB_USER: user
+      DB_PASS: password
+    depends_on:
+      db_dev:
+        condition: service_healthy
+    networks:
+      - fin_network_dev
+
+  frontend_dev:
+    build:
+      context: ./frontend/dev
+      args:
+        VITE_API_URL: http://localhost:8089
+    container_name: finmock_frontend_dev
+    deploy:
+      resources:
+        limits:
+          cpus: "0.15"
+          memory: 250M
+        reservations:
+          cpus: "0.1"
+          memory: 128M
+    ports:
+      - "3001:80"
+    depends_on:
+      - backend_dev
+    networks:
+      - fin_network_dev
 
 networks:
-  fin_network:
+  fin_network_prod:
+    driver: bridge
+  fin_network_dev:
     driver: bridge
 
 volumes:
-  db_data:
+  db_data_prod:
+  db_data_dev:

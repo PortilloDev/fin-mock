@@ -10,6 +10,6 @@ CREATE TABLE transactions (
 );
 
 INSERT INTO transactions (description, amount, type) VALUES 
-('Nómina', 2500.00, 'income'),
-('Suscripción Cloud', 45.50, 'expense'),
-('Cafetería', 12.00, 'expense');
+('Sueldo', 2500.00, 'income'),
+('Cursor', 45.50, 'expense'),
+('Restaurante', 12.00, 'expense');
