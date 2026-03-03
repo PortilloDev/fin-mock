@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: iportillo81/backend-dev:1.0
+          ports:
+            - containerPort: 80
+          env:
+            - name: DB_HOST
+              value: postgres-service-dev
